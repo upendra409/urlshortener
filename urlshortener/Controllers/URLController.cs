@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using urlshortener.Handlers;
 using urlshortener.Services;
 
 namespace urlshortener.Controllers
@@ -17,6 +18,8 @@ namespace urlshortener.Controllers
         private readonly ILogger<urlController> _logger;
         private readonly IPersisturlService _persisturlService;
         private readonly IConfiguration _configuration;
+        private ExceptionHandler _exceptionHandler;
+        private Microsoft.Extensions.Primitives.StringValues apikey;
         public urlController(ILogger<urlController> logger
             , IPersisturlService persisturlService
             , IConfiguration configuration)
@@ -24,34 +27,31 @@ namespace urlshortener.Controllers
             _logger = logger;
             _persisturlService = persisturlService;
             _configuration = configuration;
+            _exceptionHandler = new ExceptionHandler();
         }
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Url url)
         {
-            var shortUrl = _persisturlService.GetShortUrl(url);
-            return Ok(shortUrl);
+            try
+            {
+                
+                var userIpAddress = this.Request.Headers["X-Forwarded-For"].ToString().Split(',').FirstOrDefault();
+                this.Request.Headers.TryGetValue("apikey", out apikey);
+                var shortUrl = await _persisturlService.GetShortUrl(url);
+                return Ok(shortUrl);
+            }
+            catch(Exception ex)
+            {
+                _exceptionHandler.ErrorCode = "1000";
+                _exceptionHandler.ErrorMessage = ex.Message;
+                return BadRequest(_exceptionHandler);
+            }
+            
         }
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Ok();
+            return Ok(DateTime.Now.Ticks.ToString());
         }
-/*        private string CreateMD5(string input)
-        {
-            // Use input string to calculate MD5 hash
-            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
-            {
-                byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
-
-                // Convert the byte array to hexadecimal string
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; i++)
-                {
-                    sb.Append(hashBytes[i].ToString("X2"));
-                }
-                return sb.ToString();
-            }
-        }*/
     }
 }

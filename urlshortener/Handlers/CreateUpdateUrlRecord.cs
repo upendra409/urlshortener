@@ -13,6 +13,7 @@ namespace urlshortener.Handlers
     {
         private string _connectionString = string.Empty;
         private readonly IConfiguration _configuration;
+        private readonly object dblock = new object();
         public CreateUpdateUrlRecord(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -85,7 +86,10 @@ namespace urlshortener.Handlers
                         //});
                         var returnParameter = command.Parameters.Add("@ReturnCode", SqlDbType.Int);
                         returnParameter.Direction = ParameterDirection.ReturnValue;
-                        var reader = command.ExecuteReader();
+                        lock (dblock)
+                        {
+                            var reader = command.ExecuteReader();
+                        }
                         responseCode = Int32.Parse(returnParameter.Value.ToString());
                     }
                 }
