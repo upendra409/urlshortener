@@ -14,10 +14,12 @@ namespace urlshortener.Handlers
         private string _connectionString = string.Empty;
         private readonly IConfiguration _configuration;
         private readonly object dblock = new object();
+        private Response _postResponse;
         public CreateUpdateUrlRecord(IConfiguration configuration)
         {
             _configuration = configuration;
             _connectionString = Microsoft.Extensions.Configuration.ConfigurationExtensions.GetConnectionString(_configuration, "urlservicedb");
+            _postResponse = new Response();
         }
         public DataTable GetUrlTable()
         {
@@ -29,12 +31,13 @@ namespace urlshortener.Handlers
             dataTable.Columns.Add("CreatedBy", typeof(string));
             return dataTable;
         }
-        public async Task<int> HandleRecord(PersistUrl request, CancellationToken cancellationToken)
+        public async Task<Response> HandleRecord(PersistUrl request, CancellationToken cancellationToken)
         {
             try
             {
                 DataTable dataTable = GetUrlTable();
                 int responseCode = Int32.MaxValue;
+                SqlDataReader reader;
                 using (var connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
@@ -88,12 +91,58 @@ namespace urlshortener.Handlers
                         returnParameter.Direction = ParameterDirection.ReturnValue;
                         lock (dblock)
                         {
-                            var reader = command.ExecuteReader();
+                            reader = command.ExecuteReader();
                         }
                         responseCode = Int32.Parse(returnParameter.Value.ToString());
+                        if (responseCode == 0)
+                        {
+                            _postResponse.ShortUrl = request.ShortUlr;
+                            _postResponse.Identifier = request.Identifier;
+                            _postResponse.CreatedOn = System.DateTime.Now;
+                        }
+
+                    }
+                    if (responseCode == -1)
+                    {
+                        using (var command = new SqlCommand("sp_GetUrl", connection))
+                        {
+                            command.CommandType = CommandType.StoredProcedure;
+                            command.CommandTimeout = 60;
+                            command.Parameters.Add(new SqlParameter
+                            {
+                                ParameterName = "@LongUrl",
+                                Direction = ParameterDirection.Input,
+                                SqlDbType = SqlDbType.NVarChar,
+                                Value = request.LongUrl
+                            });
+                            command.Parameters.Add(new SqlParameter
+                            {
+                                ParameterName = "@ShortUrl",
+                                Direction = ParameterDirection.Input,
+                                SqlDbType = SqlDbType.NVarChar,
+                                Value = request.ShortUlr
+                            });
+                            command.Parameters.Add(new SqlParameter
+                            {
+                                ParameterName = "@Identifier",
+                                Direction = ParameterDirection.Input,
+                                SqlDbType = SqlDbType.NVarChar,
+                                Value = request.Identifier
+                            });
+                            lock (dblock)
+                            {
+                                reader = command.ExecuteReader();
+                            }
+                            while (reader.Read())
+                            {
+                                _postResponse.ShortUrl = await reader.IsDBNullAsync(0) ? "" : await reader.GetFieldValueAsync<string>(0);
+                                _postResponse.Identifier = await reader.IsDBNullAsync(1) ? "" : await reader.GetFieldValueAsync<string>(1);
+                                _postResponse.CreatedOn = await reader.IsDBNullAsync(2) ? System.DateTime.Now : await reader.GetFieldValueAsync<DateTime>(2);
+                            }
+                        }
                     }
                 }
-                return responseCode;
+                return _postResponse;
             }
             catch (Exception ex)
             {

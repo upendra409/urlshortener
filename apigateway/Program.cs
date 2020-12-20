@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace urlshortener
+namespace apigateway
 {
     public class Program
     {
@@ -21,10 +20,11 @@ namespace urlshortener
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    //var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
                     webBuilder.UseStartup<Startup>();
-                    //webBuilder.ConfigureAppConfiguration(config =>
-                    //config.AddJsonFile($"ocelot.{env}.json"));
-                });
+                    webBuilder.ConfigureAppConfiguration(config =>
+                    config.AddJsonFile($"ocelot.{env}.json"));
+                })
+            .ConfigureLogging(logging => logging.AddConsole());
     }
 }

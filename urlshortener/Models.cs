@@ -17,4 +17,10 @@ namespace urlshortener
         public DateTimeOffset CreatedOn { get; set; }
         public string CreatedBy { get; set; }
     }
+    public class Response
+    {
+        public string ShortUrl { get; set; }
+        public string Identifier { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
+    }
 }

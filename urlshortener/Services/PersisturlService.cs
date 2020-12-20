@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -12,50 +13,45 @@ namespace urlshortener.Services
 {
     public interface IPersisturlService
     {
-        Task<string> GetShortUrl(Url longUrl);
-        Task<int> SaveUrl(PersistUrl persistUrl, CancellationToken cancellationToken);
+        Task<Response> GetShortUrl(Url longUrl);
+        Task<Response> SaveUrl(PersistUrl persistUrl, CancellationToken cancellationToken);
     }
     public class PersisturlService : IPersisturlService
     {
         PersistUrl _persistUrl;
         private IConfiguration _configuration;
         private CreateUpdateUrlRecord createUpdateUrlRecord;
+        private Response postResponse;
+        private string baseHost;
         private CancellationToken source;
         public PersisturlService(IConfiguration configuration)
         {
             _persistUrl = new PersistUrl();
             _configuration = configuration;
             createUpdateUrlRecord = new CreateUpdateUrlRecord(_configuration);
+            postResponse = new Response();
             source = new CancellationToken();
+            baseHost = configuration["basehost"];
         }
-        public async Task<string> GetShortUrl(Url url)
+        public async Task<Response> GetShortUrl(Url url)
         {
             string longUrl = url.LongUrl;
             string hash = CreateMD5(longUrl);
             var base62Converter = new Base62Converter();
             var encoded = base62Converter.Encode(hash);
             _persistUrl.LongUrl = longUrl;
-            _persistUrl.ShortUlr = encoded;
-            var response = await SaveUrl(_persistUrl, source);
-            if(response == -1)
-            {
-                longUrl = longUrl + System.DateTime.UtcNow.ToLongDateString();
-                hash = CreateMD5(longUrl);
-                base62Converter = new Base62Converter();
-                encoded = base62Converter.Encode(hash);
-                _persistUrl.LongUrl = longUrl;
-                _persistUrl.ShortUlr = encoded;
-                response = await SaveUrl(_persistUrl, source);
-            }
-            return encoded;
+            _persistUrl.ShortUlr = baseHost + encoded.Substring(0,7);
+            postResponse = await SaveUrl(_persistUrl, source);
+
+            return postResponse;
         }
-        public async Task<int> SaveUrl(PersistUrl persistUrl, CancellationToken source)
+        public async Task<Response> SaveUrl(PersistUrl persistUrl, CancellationToken source)
         {
             _persistUrl.CreatedBy = "Shorten URL Service";
             _persistUrl.CreatedOn = DateTimeOffset.Now;
             _persistUrl.Identifier = System.Guid.NewGuid().ToString();
-            var responseCode = await createUpdateUrlRecord.HandleRecord(_persistUrl, source);
-            return responseCode;
+            postResponse = await createUpdateUrlRecord.HandleRecord(_persistUrl, source);
+            return postResponse;
         }
 
 
