@@ -149,5 +149,35 @@ namespace urlshortener.Handlers
                 throw ex;
             }
         }
+        public async Task<string> GetLongUrlRecord(string shortUrl, CancellationToken cancellationToken)
+        {
+            SqlDataReader reader;
+            string response = "";
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = new SqlCommand("sp_GetLongUrl", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.CommandTimeout = 60;
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@ShortUrl",
+                        Direction = ParameterDirection.Input,
+                        SqlDbType = SqlDbType.NVarChar,
+                        Value = shortUrl
+                    });
+                    lock (dblock)
+                    {
+                        reader = command.ExecuteReader();
+                    }
+                    while (reader.Read())
+                    {
+                        response = await reader.IsDBNullAsync(0) ? "" : await reader.GetFieldValueAsync<string>(0);
+                    }
+                }
+            }
+            return response;
+        }
     }
 }

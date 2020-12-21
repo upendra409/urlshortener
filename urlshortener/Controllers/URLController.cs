@@ -48,10 +48,37 @@ namespace urlshortener.Controllers
             }
             
         }
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        //[HttpGet("{shorturl}", Name = "Get")]
+        //public async Task<IActionResult> Get(string shorturl, [FromQuery(Name = "redirect")] bool redirect = true)
+        //{
+        //    try
+        //    {
+        //        shorturl = shorturl.Substring(shorturl.Length - 7, 7);
+        //        var longUrl = await _persisturlService.GetLongUrl(shorturl);
+        //        return Redirect(longUrl);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _exceptionHandler.ErrorCode = "1000";
+        //        _exceptionHandler.ErrorMessage = ex.Message;
+        //        return BadRequest(_exceptionHandler);
+        //    }
+        //}
+        [HttpGet("{shorturl}", Name = "Get")]
+        public async Task<IActionResult> Get(string shorturl)
         {
-            return Ok(DateTime.Now.Ticks.ToString());
+            try
+            {
+                shorturl = shorturl.Substring(shorturl.Length - 7, 7);
+                var longUrl = await _persisturlService.GetLongUrl(shorturl);
+                return Redirect(longUrl);
+            }
+            catch (Exception ex)
+            {
+                _exceptionHandler.ErrorCode = "1000";
+                _exceptionHandler.ErrorMessage = ex.Message;
+                return BadRequest(_exceptionHandler);
+            }
         }
     }
 }

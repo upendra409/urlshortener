@@ -14,6 +14,7 @@ namespace urlshortener.Services
     public interface IPersisturlService
     {
         Task<Response> GetShortUrl(Url longUrl);
+        Task<string> GetLongUrl(string shortUrl);
         Task<Response> SaveUrl(PersistUrl persistUrl, CancellationToken cancellationToken);
     }
     public class PersisturlService : IPersisturlService
@@ -33,6 +34,14 @@ namespace urlshortener.Services
             source = new CancellationToken();
             baseHost = configuration["basehost"];
         }
+
+        public async Task<string> GetLongUrl(string shortUrl)
+        {
+            shortUrl = baseHost + shortUrl;
+            var response = await createUpdateUrlRecord.GetLongUrlRecord(shortUrl, source);
+            return response;
+        }
+
         public async Task<Response> GetShortUrl(Url url)
         {
             string longUrl = url.LongUrl;
