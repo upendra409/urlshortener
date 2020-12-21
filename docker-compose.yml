@@ -1,0 +1,46 @@
+version: '3.4'
+services:
+  apigateway:
+    image: apigateway
+    ports:
+      - 5199:5199
+    #build:
+    #   context: .
+    #   dockerfile: ./apigateway/Dockerfile
+    networks:
+      - shortnetwork
+  
+  urlshortener:
+    image: urlshortener
+    ports:
+     - 5200:5200
+    #build:
+    #  context: .
+    #  dockerfile: ./urlshortener/urlshortener/Dockerfile
+    networks:
+     - shortnetwork
+  
+  mysqlserver:
+    image: mysqlserver
+    #volumes:
+    #  - mssql_data:/var/opt/mssql
+    ports:
+      - 1433:1433
+    networks:
+      - shortnetwork
+    environment:
+        SA_PASSWORD: "CorrectHorseBatteryStapleFor$$"
+        ACCEPT_EULA: "Y"
+
+  # identityserver:
+  #   image: d2cjhconnectedregistry.azurecr.io/identityserver
+  #   env_file:
+  #     - ./docker/env/local.env
+  #   networks:
+  #     - d2c-net
+
+#volumes:
+#  mssql_data: {}
+networks:
+  shortnetwork:
+    driver: bridge

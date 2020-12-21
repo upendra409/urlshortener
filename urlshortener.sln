@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "urlshortener", "urlshortene
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "apigateway", "apigateway\apigateway.csproj", "{9731C8B9-9B7F-4CAE-97C6-A37541948E85}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{84FB2CA7-5EEC-459E-B5DF-47AD7AF9AFAC}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\test\dtc\DTC_DevOps\docker-compose.yml = ..\..\test\dtc\DTC_DevOps\docker-compose.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
