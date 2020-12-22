@@ -12,7 +12,8 @@ using urlshortener.Services;
 namespace urlshortener.Controllers
 {
     [ApiController]
-    [Route("urlservice/v1/[controller]")]
+    //[Route("urlservice/v1/[controller]")]
+    [Route("/")]
     public class urlController : ControllerBase
     {
         private readonly ILogger<urlController> _logger;

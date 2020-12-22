@@ -1,0 +1,26 @@
+{
+  "ReRoutes": [
+    {
+      "DownstreamPathTemplate": "/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "urlshortener",
+          "Port": 5200
+        }
+      ],
+      "UpstreamPathTemplate": "/urlservice/url",
+      "UpstreamHttpMethod": [ "Post","Get" ],
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "5s",
+        "PeriodTimespan": 2,
+        "Limit": 1
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5199"
+  }
+ }

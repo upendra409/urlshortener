@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   apigateway:
-    image: apigateway
+    image: upendra409/apigateway
     ports:
       - 5199:5199
     #build:
@@ -11,7 +11,7 @@ services:
       - shortnetwork
   
   urlshortener:
-    image: urlshortener
+    image: upendra409/urlshortener
     ports:
      - 5200:5200
     #build:
@@ -21,7 +21,7 @@ services:
      - shortnetwork
   
   mysqlserver:
-    image: mysqlserver
+    image: upendra409/mysqlserver
     #volumes:
     #  - mssql_data:/var/opt/mssql
     ports:
