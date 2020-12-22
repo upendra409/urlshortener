@@ -44,3 +44,24 @@ docker-compose file in the root folder refers to the following images in the pub
 - upendra409/urlshortener
 - upendra409/mysqlserver
 
+
+Running docker-compose up command downloads the images from dockerhub and sets the solution on the local set up. The urlshortener api can be tested on "http://localhost:5200" end point.
+
+The apigateway can be tested for post operations on "http://localhost:5199" end point. When it hits the urlshortener api it brings back the response 
+
+{
+    "shortUrl": "http://localhost:5200/C8vFl3O",
+    "identifier": "178b0cb1-5979-41d9-a9d7-81fc376dc1cf",
+    "createdOn": "2020-12-21T23:00:39.6662554+00:00"
+}
+
+Using the returned shortUrl in the browser will render the original url. Please note that running the sql container locally may fail initially as the container itself takes some time to spin up & start running.
+-----------------
+2020-12-22 01:38:09.82 Logon       Login failed for user 'sa'. Reason: Failed to open the explicitly specified database 'urlservice'. [CLIENT: 172.18.0.1]
+2020-12-22 01:38:19.85 Logon       Error: 18456, Severity: 14, State: 38.
+2020-12-22 01:38:19.85 Logon       Login failed for user 'sa'. Reason: Failed to open the explicitly specified database 'urlservice'. [CLIENT: 172.18.0.1]
+2020-12-22 01:38:31.67 spid53      Starting up database 'urlservice'.
+2020-12-22 01:38:31.85 spid53      Parallel redo is started for database 'urlservice' with worker pool size [1].
+2020-12-22 01:38:31.88 spid53      Parallel redo is shutdown for database 'urlservice' with worker pool size [1].
+Changed database context to 'urlservice'.
+------------------
