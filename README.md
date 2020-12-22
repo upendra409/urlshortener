@@ -33,3 +33,14 @@ mysqlserver is the image for sql server + a few database objects that are requir
 
 The solution (urlshortener + sqlserver database) is deployed on Microsoft Azure cloud and the api definition can be viewed using the url
 https://urlshortenerdec2020.azurewebsites.net/swagger/index.html. Swagger gives some information about how the api can be tested.
+
+### Docker components
+Docker components in the solution consist of the docker files for following
+- urlshortener
+- apigateway
+
+docker-compose file in the root folder refers to the following images in the public dockerhub repository
+- upendra409/apigateway
+- upendra409/urlshortener
+- upendra409/mysqlserver
+
